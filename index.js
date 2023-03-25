@@ -63,14 +63,16 @@ const handleEvent = async (event) => {
         return Promise.resolve(null);
     }
     const completion = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: event.message.text,
+      model: "text-davinci-003",  //GPT3模型
+      prompt: event.message.text,  //人類的發問
+      max_tokens: 300,
+      temperature: 0,
     });
     console.log(completion.data.choices[0].text);
 
     msg = {
-      type: 'text', text: completion.data.choices[0].text // 範例
-  }
+      type: 'text', text: completion.data.choices[0].text // 回傳的AI回答
+      }
 
     
     return client.replyMessage(event.replyToken, msg).catch((err) => {
@@ -88,17 +90,14 @@ app.get('/', (req, res) => {
   res.end('hello!');
 });
 
-app.post('/webhook', (req, res) => {
+app.post('/callback', (req, res) => {
     Promise
-        .all(req.body.events.map(handleEvent))
+        .all(req.body.events.map(handleEvent))  //handleEvent處理傳過來的訊息再回傳
         .then((result) => res.json(result))
         .catch((err) => {
             res.status(500).end();
         });
 });
-
-
-
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
